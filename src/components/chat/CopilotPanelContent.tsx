@@ -48,17 +48,19 @@ function QuickActionChip({
 function DestinationCard({
   name,
   country,
-  emoji
+  emoji,
+  prompt
 }: {
   name: string;
   country: string;
   emoji: string;
+  prompt?: string;
 }) {
   const { send } = useCopilotChatContext();
 
   return (
     <button
-      onClick={() => send(`Show me ${name}`)}
+      onClick={() => send(prompt || `Show me ${name}`)}
       className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-indigo-200 hover:shadow-sm transition-all text-left"
     >
       <span className="text-2xl">{emoji}</span>
@@ -127,6 +129,7 @@ function TravelHome() {
           <DestinationCard name="Tokyo" country="Japan" emoji="🗾" />
           <DestinationCard name="New York" country="United States" emoji="🗽" />
           <DestinationCard name="Dubai" country="UAE" emoji="🏙️" />
+          <DestinationCard name="India" country="India" emoji="🇮🇳" prompt="Show me Chandigarh, India" />
         </div>
       </div>
     </div>
