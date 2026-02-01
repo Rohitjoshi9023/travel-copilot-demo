@@ -105,16 +105,16 @@ export function MapContainer({ apiKey, onPlaceSelect }: MapContainerProps) {
           )}
         </AnimatePresence>
 
-        {/* Controls - hide in Street View */}
+        {/* View Switcher - always visible */}
+        <ViewSwitcher />
+
+        {/* Map Controls - hide in Street View */}
         {viewMode !== 'streetview' && (
-          <>
-            <ViewSwitcher />
-            <MapControls
-              onLocateUser={handleLocateUser}
-              isDarkMode={isDarkMode}
-              onToggleDarkMode={toggleDarkMode}
-            />
-          </>
+          <MapControls
+            onLocateUser={handleLocateUser}
+            isDarkMode={isDarkMode}
+            onToggleDarkMode={toggleDarkMode}
+          />
         )}
 
         {/* Loading overlay */}
