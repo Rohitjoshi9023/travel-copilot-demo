@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useCopilot } from '@yourgpt/copilot-sdk/react';
 import { CopilotChat, useCopilotChatContext } from '@yourgpt/copilot-sdk/ui';
-import { MapPin, Utensils, Hotel, Navigation, Landmark } from 'lucide-react';
+import { MapPin, Utensils, Hotel, CalendarPlus, Landmark } from 'lucide-react';
 import { CopilotToolsProvider } from './CopilotToolsProvider';
 import { toolRenderers } from './toolRenderers';
 import { useChatIntentStore } from '@/stores/chatIntentStore';
@@ -106,7 +106,7 @@ function DestinationCard({
   return (
     <button
       onClick={() => send(prompt || `Show me ${name}`)}
-      className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-indigo-200 hover:shadow-sm transition-all text-left"
+      className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-indigo-200 hover:shadow-sm transition-all text-left"
     >
       <span className="text-2xl">{emoji}</span>
       <div>
@@ -158,9 +158,9 @@ function TravelHome() {
             color="purple"
           />
           <QuickActionChip
-            icon={Navigation}
-            label="Get directions"
-            message="Get directions"
+            icon={CalendarPlus}
+            label="Plan a trip"
+            message="Help me plan a new trip"
             color="emerald"
           />
         </div>
@@ -171,10 +171,10 @@ function TravelHome() {
         <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Popular Destinations</h3>
         <div className="space-y-2">
           <DestinationCard name="Paris" country="France" emoji="🗼" />
-          <DestinationCard name="Tokyo" country="Japan" emoji="🗾" />
-          <DestinationCard name="New York" country="United States" emoji="🗽" />
           <DestinationCard name="Dubai" country="UAE" emoji="🏙️" />
           <DestinationCard name="India" country="India" emoji="🇮🇳" prompt="Show me Chandigarh, India" />
+          <DestinationCard name="Tokyo" country="Japan" emoji="🗾" />
+          <DestinationCard name="New York" country="United States" emoji="🗽" />
         </div>
       </div>
     </div>
