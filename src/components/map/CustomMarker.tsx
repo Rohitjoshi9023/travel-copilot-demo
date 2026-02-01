@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { config } from '@/lib/config';
 import { usePlacesStore } from '@/stores/placesStore';
+import { useChatIntentStore } from '@/stores/chatIntentStore';
 import type { Marker, PlaceType, Place } from '@/types';
 
 interface CustomMarkerProps {
@@ -232,7 +233,7 @@ export function CustomMarker({
 }: CustomMarkerProps) {
   const [markerRef, advancedMarker] = useAdvancedMarkerRef();
   const places = usePlacesStore((s) => s.places);
-  const addToItinerary = usePlacesStore((s) => s.addToItinerary);
+  const setPendingIntent = useChatIntentStore((s) => s.setPendingIntent);
 
   // Find place details from places store using placeId
   const place = marker.placeId
@@ -245,9 +246,14 @@ export function CustomMarker({
 
   const handleAddToItinerary = useCallback(() => {
     if (place) {
-      addToItinerary(place, 1);
+      // Set the pending intent to trigger AI chat
+      setPendingIntent({
+        type: 'addToTrip',
+        place,
+        timestamp: Date.now(),
+      });
     }
-  }, [place, addToItinerary]);
+  }, [place, setPendingIntent]);
 
   const handleGetDirections = useCallback(() => {
     // Open Google Maps directions in a new tab

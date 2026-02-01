@@ -1,14 +1,59 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useCopilot } from '@yourgpt/copilot-sdk/react';
 import { CopilotChat, useCopilotChatContext } from '@yourgpt/copilot-sdk/ui';
 import { MapPin, Utensils, Hotel, Navigation, Landmark } from 'lucide-react';
 import { CopilotToolsProvider } from './CopilotToolsProvider';
 import { toolRenderers } from './toolRenderers';
+import { useChatIntentStore } from '@/stores/chatIntentStore';
+import { useTripsStore } from '@/stores/tripsStore';
 
 // Import Copilot SDK base styles
 import '@yourgpt/copilot-sdk/ui/styles.css';
+
+// Component that watches for pending intents and sends messages to AI
+function ChatIntentHandler() {
+  const { sendMessage } = useCopilot();
+  const pendingIntent = useChatIntentStore((s) => s.pendingIntent);
+  const clearIntent = useChatIntentStore((s) => s.clearIntent);
+  const activeTrip = useTripsStore((s) => s.getActiveTrip());
+  const processedIntentRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Check if we have a pending intent that hasn't been processed yet
+    if (pendingIntent && pendingIntent.timestamp !== processedIntentRef.current) {
+      processedIntentRef.current = pendingIntent.timestamp;
+
+      const place = pendingIntent.place;
+      const tripName = activeTrip?.name || 'my trip';
+      const tripDays = activeTrip?.daysCount || 1;
+
+      // Construct a helpful message for the AI
+      let message = `I'd like to add "${place.name}" to ${tripName}.`;
+
+      if (place.address) {
+        message += ` It's located at ${place.address}.`;
+      }
+
+      if (tripDays > 1) {
+        message += ` I have ${tripDays} days planned. Which day would be best for this visit?`;
+      } else {
+        message += ` Can you help me decide when to visit?`;
+      }
+
+      // Send the message to the AI using useCopilot's sendMessage
+      sendMessage(message);
+
+      // Clear the intent after a short delay to allow the message to be sent
+      setTimeout(() => {
+        clearIntent();
+      }, 100);
+    }
+  }, [pendingIntent, clearIntent, sendMessage, activeTrip]);
+
+  return null;
+}
 
 // Quick action chip component
 function QuickActionChip({
@@ -155,6 +200,9 @@ export function CopilotPanelContent() {
     <div className="h-full flex flex-col">
       {/* Register AI tools */}
       <CopilotToolsProvider />
+
+      {/* Intent handler - watches for "Add to Trip" requests from map markers */}
+      <ChatIntentHandler />
 
       {/* CopilotChat with compound components */}
       <CopilotChat.Root

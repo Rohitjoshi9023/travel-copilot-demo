@@ -15,6 +15,7 @@ import { CopilotPanel, CopilotBottomSheet } from '@/components/chat/CopilotPanel
 import { TripSelector } from '@/components/trips/TripSelector';
 import { usePlaces } from '@/hooks/usePlaces';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useTripMapSync } from '@/hooks/useTripMapSync';
 
 interface AppShellProps {
   googleMapsApiKey: string;
@@ -28,6 +29,9 @@ export function AppShell({ googleMapsApiKey }: AppShellProps) {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   const { searchPlaces, isSearching } = usePlaces();
+
+  // Sync map location with active trip's destination
+  useTripMapSync();
 
   // Ensure component is mounted before rendering Copilot components
   useEffect(() => {

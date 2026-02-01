@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { X, Loader2, Sparkles, MessageSquare, Map } from 'lucide-react';
+import { useChatIntentStore } from '@/stores/chatIntentStore';
 
 // Dynamically import the content components with SSR disabled
 const CopilotPanelContent = dynamic(
@@ -44,6 +45,17 @@ interface CopilotPanelProps {
 
 export function CopilotPanel({ onClose }: CopilotPanelProps) {
   const [activeTab, setActiveTab] = useState<PanelTab>('chat');
+  const setOnIntentSet = useChatIntentStore((s) => s.setOnIntentSet);
+
+  // Register callback to switch to chat tab when intent is set
+  const switchToChatTab = useCallback(() => {
+    setActiveTab('chat');
+  }, []);
+
+  useEffect(() => {
+    setOnIntentSet(switchToChatTab);
+    return () => setOnIntentSet(null);
+  }, [setOnIntentSet, switchToChatTab]);
 
   return (
     <div className="h-full w-full bg-white border-l border-gray-200 shadow-xl flex flex-col">
@@ -111,6 +123,17 @@ export function CopilotBottomSheet({
   onClose: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<PanelTab>('chat');
+  const setOnIntentSet = useChatIntentStore((s) => s.setOnIntentSet);
+
+  // Register callback to switch to chat tab when intent is set
+  const switchToChatTab = useCallback(() => {
+    setActiveTab('chat');
+  }, []);
+
+  useEffect(() => {
+    setOnIntentSet(switchToChatTab);
+    return () => setOnIntentSet(null);
+  }, [setOnIntentSet, switchToChatTab]);
 
   if (!isOpen) return null;
 
