@@ -89,7 +89,7 @@ function InfoWindowContent({
         >
           {(() => {
             const Icon = iconMap[marker.type];
-            return <Icon style={{ width: 20, height: 20, color: 'white', stroke: 'white' }} />;
+            return <Icon className="w-5 h-5 text-white" />;
           })()}
         </div>
         <div className="flex-1 min-w-0">
@@ -280,7 +280,7 @@ export function CustomMarker({
             className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg cursor-pointer transition-transform hover:scale-110"
             style={{ backgroundColor: color }}
           >
-            <Icon style={{ width: 20, height: 20, color: 'white', stroke: 'white' }} />
+            <Icon className="w-5 h-5 text-white" />
           </div>
           {/* Pin tail */}
           <div

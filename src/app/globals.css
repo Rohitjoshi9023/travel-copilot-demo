@@ -55,6 +55,19 @@
     --color-border: #374151;
     --color-border-light: #1f2937;
   }
+
+  /* Force dark text in form inputs even in dark mode (since they have white backgrounds) */
+  input,
+  textarea,
+  select {
+    color: #1f2937 !important;
+    background-color: #ffffff !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #9ca3af !important;
+  }
 }
 
 /* Tailwind Theme Extension */
@@ -245,10 +258,25 @@ body {
   color: var(--color-primary);
 }
 
-/* Placeholder styles */
+/* Placeholder styles - ensure visibility on all backgrounds */
 ::placeholder {
-  color: var(--color-text-muted);
-  opacity: 1;
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+::-webkit-input-placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+::-moz-placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+:-ms-input-placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
 }
 
 /* Button reset */
@@ -277,6 +305,38 @@ textarea,
 select {
   font-family: inherit;
   font-size: inherit;
+  color: #1f2937 !important;
+  background-color: #ffffff;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+/* Ensure inputs on white backgrounds always have dark text */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+textarea,
+select {
+  color: #1f2937 !important;
+  caret-color: #1f2937 !important;
+}
+
+/* Date/time input specific fixes for webkit browsers */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0);
 }
 
 /* Copilot SDK Layout Overrides */

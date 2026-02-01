@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { MapContainer } from '@/components/map/MapContainer';
 import { CopilotPanel, CopilotBottomSheet } from '@/components/chat/CopilotPanel';
+import { TripSelector } from '@/components/trips/TripSelector';
 import { usePlaces } from '@/hooks/usePlaces';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
@@ -73,6 +74,9 @@ export function AppShell({ googleMapsApiKey }: AppShellProps) {
                 Travel Copilot
               </span>
             </div>
+
+            {/* Trip Selector */}
+            <TripSelector />
 
             {/* Search bar */}
             <form

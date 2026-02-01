@@ -1,9 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { X, Loader2, Sparkles } from 'lucide-react';
+import { X, Loader2, Sparkles, MessageSquare, Map } from 'lucide-react';
 
-// Dynamically import the content component with SSR disabled
+// Dynamically import the content components with SSR disabled
 const CopilotPanelContent = dynamic(
   () => import('./CopilotPanelContent').then((mod) => mod.CopilotPanelContent),
   {
@@ -19,12 +20,31 @@ const CopilotPanelContent = dynamic(
   }
 );
 
+const TripsPanelContent = dynamic(
+  () => import('@/components/trips/TripsPanelContent').then((mod) => mod.TripsPanelContent),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="flex items-center gap-2 text-gray-500">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <span>Loading...</span>
+        </div>
+      </div>
+    ),
+  }
+);
+
+type PanelTab = 'chat' | 'plans';
+
 interface CopilotPanelProps {
   isOpen?: boolean;
   onClose?: () => void;
 }
 
 export function CopilotPanel({ onClose }: CopilotPanelProps) {
+  const [activeTab, setActiveTab] = useState<PanelTab>('chat');
+
   return (
     <div className="h-full w-full bg-white border-l border-gray-200 shadow-xl flex flex-col">
       {/* Header */}
@@ -48,9 +68,35 @@ export function CopilotPanel({ onClose }: CopilotPanelProps) {
         )}
       </div>
 
+      {/* Tabs */}
+      <div className="flex-shrink-0 flex border-b border-gray-200 bg-gray-50">
+        <button
+          onClick={() => setActiveTab('chat')}
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+            activeTab === 'chat'
+              ? 'text-indigo-600 border-b-2 border-indigo-600 bg-white'
+              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          <MessageSquare className="w-4 h-4" />
+          Chat
+        </button>
+        <button
+          onClick={() => setActiveTab('plans')}
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+            activeTab === 'plans'
+              ? 'text-indigo-600 border-b-2 border-indigo-600 bg-white'
+              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          <Map className="w-4 h-4" />
+          My Plans
+        </button>
+      </div>
+
       {/* Content - takes remaining height */}
       <div className="flex-1 min-h-0">
-        <CopilotPanelContent />
+        {activeTab === 'chat' ? <CopilotPanelContent /> : <TripsPanelContent />}
       </div>
     </div>
   );
@@ -64,6 +110,8 @@ export function CopilotBottomSheet({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const [activeTab, setActiveTab] = useState<PanelTab>('chat');
+
   if (!isOpen) return null;
 
   return (
@@ -92,9 +140,35 @@ export function CopilotBottomSheet({
         </button>
       </div>
 
+      {/* Tabs */}
+      <div className="flex-shrink-0 flex border-b border-gray-200 bg-gray-50">
+        <button
+          onClick={() => setActiveTab('chat')}
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+            activeTab === 'chat'
+              ? 'text-indigo-600 border-b-2 border-indigo-600 bg-white'
+              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          <MessageSquare className="w-4 h-4" />
+          Chat
+        </button>
+        <button
+          onClick={() => setActiveTab('plans')}
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+            activeTab === 'plans'
+              ? 'text-indigo-600 border-b-2 border-indigo-600 bg-white'
+              : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          <Map className="w-4 h-4" />
+          My Plans
+        </button>
+      </div>
+
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-hidden">
-        <CopilotPanelContent />
+        {activeTab === 'chat' ? <CopilotPanelContent /> : <TripsPanelContent />}
       </div>
     </div>
   );

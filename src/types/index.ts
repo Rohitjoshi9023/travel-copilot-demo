@@ -107,7 +107,7 @@ export interface Route {
   };
 }
 
-// Itinerary types
+// Itinerary types (legacy - kept for backward compatibility)
 export interface ItineraryItem {
   id: string;
   place: Place;
@@ -124,6 +124,37 @@ export interface Itinerary {
   startDate?: string;
   endDate?: string;
   items: ItineraryItem[];
+}
+
+// Trip types
+export type TripStatus = 'planning' | 'upcoming' | 'ongoing' | 'completed';
+
+export type TripItemCategory = 'accommodation' | 'activity' | 'dining' | 'transport' | 'sightseeing' | 'other';
+
+export interface TripItem {
+  id: string;
+  place: Place;
+  day: number;
+  order: number;
+  startTime?: string;
+  endTime?: string;
+  notes?: string;
+  category?: TripItemCategory;
+}
+
+export interface Trip {
+  id: string;
+  name: string;
+  description?: string;
+  destination?: string;
+  coverImage?: string;
+  startDate?: string;
+  endDate?: string;
+  createdAt: string;
+  updatedAt: string;
+  items: TripItem[];
+  status: TripStatus;
+  daysCount: number;
 }
 
 // Chat/Copilot types

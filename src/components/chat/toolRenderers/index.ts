@@ -9,6 +9,8 @@ import { GetPlaceDetailsRenderer } from './GetPlaceDetailsRenderer';
 import { GetDirectionsRenderer } from './GetDirectionsRenderer';
 import { AddToItineraryRenderer } from './AddToItineraryRenderer';
 import { AdjustZoomRenderer } from './AdjustZoomRenderer';
+import { CreateTripRenderer } from './CreateTripRenderer';
+import { ListTripsRenderer } from './ListTripsRenderer';
 import type { ToolExecution } from './ToolRendererWrapper';
 
 // Type for a tool renderer that accepts an execution prop
@@ -26,6 +28,8 @@ export const toolRenderers: Record<string, ToolRenderer> = {
   getDirections: GetDirectionsRenderer,
   addToItinerary: AddToItineraryRenderer,
   adjustZoom: AdjustZoomRenderer,
+  createTrip: CreateTripRenderer,
+  listTrips: ListTripsRenderer,
 };
 
 export type ToolName = keyof typeof toolRenderers;
