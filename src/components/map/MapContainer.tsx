@@ -59,7 +59,7 @@ export function MapContainer({ apiKey, onPlaceSelect }: MapContainerProps) {
   }, []);
 
   return (
-    <APIProvider apiKey={apiKey}>
+    <APIProvider apiKey={apiKey} libraries={['places', 'maps3d']}>
       <div className="relative w-full h-full">
         <AnimatePresence mode="wait">
           {viewMode === 'map2d' && (

@@ -1,14 +1,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { motion } from 'framer-motion';
 import { X, Loader2, Sparkles } from 'lucide-react';
 
 // Dynamically import the content component with SSR disabled
-// This ensures useCopilot and useCopilotTools only run on the client
 const CopilotPanelContent = dynamic(
-  () =>
-    import('./CopilotPanelContent').then((mod) => mod.CopilotPanelContent),
+  () => import('./CopilotPanelContent').then((mod) => mod.CopilotPanelContent),
   {
     ssr: false,
     loading: () => (
@@ -27,16 +24,11 @@ interface CopilotPanelProps {
   onClose?: () => void;
 }
 
-export function CopilotPanel({ isOpen = true, onClose }: CopilotPanelProps) {
+export function CopilotPanel({ onClose }: CopilotPanelProps) {
   return (
-    <motion.div
-      initial={{ x: '100%' }}
-      animate={{ x: isOpen ? 0 : '100%' }}
-      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-      className="fixed right-0 top-0 h-full w-full max-w-md bg-white border-l border-gray-200 shadow-xl flex flex-col z-40"
-    >
+    <div className="h-full w-full bg-white border-l border-gray-200 shadow-xl flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
+      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-indigo-600" />
@@ -56,9 +48,11 @@ export function CopilotPanel({ isOpen = true, onClose }: CopilotPanelProps) {
         )}
       </div>
 
-      {/* Content - dynamically loaded, client-side only */}
-      <CopilotPanelContent />
-    </motion.div>
+      {/* Content - takes remaining height */}
+      <div className="flex-1 min-h-0">
+        <CopilotPanelContent />
+      </div>
+    </div>
   );
 }
 
@@ -70,20 +64,17 @@ export function CopilotBottomSheet({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  if (!isOpen) return null;
+
   return (
-    <motion.div
-      initial={{ y: '100%' }}
-      animate={{ y: isOpen ? 0 : '100%' }}
-      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-      className="fixed bottom-0 left-0 right-0 h-[70vh] bg-white rounded-t-2xl shadow-xl z-40"
-    >
+    <div className="fixed bottom-0 left-0 right-0 h-[70vh] bg-white rounded-t-2xl shadow-xl z-40 flex flex-col">
       {/* Drag handle */}
-      <div className="flex justify-center py-2">
+      <div className="flex justify-center py-2 flex-shrink-0">
         <div className="w-10 h-1 bg-gray-300 rounded-full" />
       </div>
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+      <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-indigo-600" />
@@ -101,10 +92,10 @@ export function CopilotBottomSheet({
         </button>
       </div>
 
-      {/* Content - dynamically loaded, client-side only */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Content */}
+      <div className="flex-1 min-h-0 overflow-hidden">
         <CopilotPanelContent />
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -1,275 +1,180 @@
 'use client';
 
-import { useCallback, useRef, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useCopilot } from '@yourgpt/copilot-sdk/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, Bot, User, Sparkles } from 'lucide-react';
-import { usePlacesStore } from '@/stores/placesStore';
-import { PlaceCard, PlaceCardCarousel } from './PlaceCard';
-import { SuggestionChips } from './SuggestionChips';
+import { CopilotChat, useCopilotChatContext } from '@yourgpt/copilot-sdk/ui';
+import { MapPin, Utensils, Hotel, Navigation, Landmark } from 'lucide-react';
 import { CopilotToolsProvider } from './CopilotToolsProvider';
-import type { Place } from '@/types';
+import { toolRenderers } from './toolRenderers';
 
-// This component uses Copilot hooks and must only be rendered inside CopilotProvider
-export function CopilotPanelContent() {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [inputValue, setInputValue] = useState('');
+// Import Copilot SDK base styles
+import '@yourgpt/copilot-sdk/ui/styles.css';
 
-  // Use copilot hook
-  const { messages, isLoading, sendMessage, status, toolExecutions, registeredTools, pendingApprovals } = useCopilot();
+// Quick action chip component
+function QuickActionChip({
+  icon: Icon,
+  label,
+  message,
+  color = 'indigo'
+}: {
+  icon: React.ElementType;
+  label: string;
+  message: string;
+  color?: 'indigo' | 'orange' | 'emerald' | 'purple';
+}) {
+  const { send } = useCopilotChatContext();
 
-  // Debug: log registered tools on mount
-  useEffect(() => {
-    console.log('[Copilot] Registered tools:', registeredTools?.map(t => t.name));
-    console.log('[Copilot] Registered tools full:', registeredTools);
-  }, [registeredTools]);
-
-  // Debug: log status changes
-  useEffect(() => {
-    console.log('[Copilot] Status changed:', status);
-  }, [status]);
-
-  // Debug: log tool executions
-  useEffect(() => {
-    console.log('[Copilot] Tool executions updated:', toolExecutions);
-    if (toolExecutions?.length > 0) {
-      toolExecutions.forEach(exec => {
-        console.log(`[Copilot] Tool exec: ${exec.name} - status: ${exec.status}, approval: ${exec.approvalStatus}`);
-      });
-    }
-  }, [toolExecutions]);
-
-  // Debug: log pending approvals
-  useEffect(() => {
-    console.log('[Copilot] Pending approvals:', pendingApprovals);
-  }, [pendingApprovals]);
-
-  // Debug: log messages with detailed tool call info
-  useEffect(() => {
-    console.log('[Copilot] Messages count:', messages?.length);
-    messages?.forEach((msg, i) => {
-      if (msg.toolCalls && msg.toolCalls.length > 0) {
-        console.log(`[Copilot] Message ${i} has toolCalls:`, msg.toolCalls);
-      }
-    });
-  }, [messages]);
-
-  const places = usePlacesStore((s) => s.places);
-  const selectedPlace = usePlacesStore((s) => s.selectedPlace);
-
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
-
-  const handleSubmit = useCallback(
-    async (e?: React.FormEvent) => {
-      e?.preventDefault();
-      const message = inputValue.trim();
-      if (!message || isLoading) return;
-
-      setInputValue('');
-      await sendMessage(message);
-    },
-    [inputValue, isLoading, sendMessage]
-  );
-
-  const handleSuggestionSelect = useCallback(
-    async (query: string) => {
-      await sendMessage(query);
-    },
-    [sendMessage]
-  );
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        handleSubmit();
-      }
-    },
-    [handleSubmit]
-  );
+  const colorClasses = {
+    indigo: 'bg-indigo-100 text-indigo-600',
+    orange: 'bg-orange-100 text-orange-600',
+    emerald: 'bg-emerald-100 text-emerald-600',
+    purple: 'bg-purple-100 text-purple-600',
+  };
 
   return (
-    <>
-      {/* Register AI tools for map control and place search */}
-      <CopilotToolsProvider />
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
-        {messages.length === 0 && (
-          <WelcomeMessage onSuggestionSelect={handleSuggestionSelect} />
-        )}
-
-        {messages
-          .filter(
-            (message) => message.role === 'user' || message.role === 'assistant'
-          )
-          .map((message) => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              places={message.role === 'assistant' ? places : undefined}
-            />
-          ))}
-
-        {(isLoading || status === 'streaming') && (
-          <div className="flex items-center gap-2 text-gray-500">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span className="text-sm">Thinking...</span>
-          </div>
-        )}
-
-        <div ref={messagesEndRef} />
+    <button
+      onClick={() => send(message)}
+      className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all text-left group"
+    >
+      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${colorClasses[color]}`}>
+        <Icon className="w-4 h-4" />
       </div>
-
-      {/* Selected place preview */}
-      <AnimatePresence>
-        {selectedPlace && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="px-4 py-3 border-t border-gray-200 bg-gray-50"
-          >
-            <PlaceCard place={selectedPlace} variant="compact" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Suggestions */}
-      {messages.length > 0 && !isLoading && (
-        <div className="px-4 py-2 border-t border-gray-100">
-          <SuggestionChips
-            context={
-              selectedPlace
-                ? 'place_selected'
-                : places.length > 0
-                  ? 'search_results'
-                  : undefined
-            }
-            onSelect={handleSuggestionSelect}
-          />
-        </div>
-      )}
-
-      {/* Input */}
-      <div className="p-4 border-t border-gray-200 bg-white">
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <div className="flex-1 relative">
-            <textarea
-              ref={inputRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask me anything about places..."
-              rows={1}
-              className="w-full px-4 py-2.5 pr-10 bg-gray-100 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white text-sm"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={!inputValue.trim() || isLoading}
-            className="p-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <Send className="w-5 h-5" />
-          </button>
-        </form>
-      </div>
-    </>
+      <span className="text-sm text-gray-700 group-hover:text-gray-900">{label}</span>
+    </button>
   );
 }
 
-function WelcomeMessage({
-  onSuggestionSelect,
+// Popular destination card
+function DestinationCard({
+  name,
+  country,
+  emoji
 }: {
-  onSuggestionSelect: (query: string) => void;
+  name: string;
+  country: string;
+  emoji: string;
 }) {
+  const { send } = useCopilotChatContext();
+
   return (
-    <div className="text-center py-8">
-      <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mx-auto mb-4">
-        <Sparkles className="w-8 h-8 text-indigo-600" />
+    <button
+      onClick={() => send(`Show me ${name}`)}
+      className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-indigo-200 hover:shadow-sm transition-all text-left"
+    >
+      <span className="text-2xl">{emoji}</span>
+      <div>
+        <div className="font-medium text-gray-900 text-sm">{name}</div>
+        <div className="text-xs text-gray-500">{country}</div>
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        Welcome to Travel Copilot
-      </h3>
-      <p className="text-sm text-gray-600 mb-6 max-w-xs mx-auto">
-        I can help you explore places, find hotels and restaurants, plan trips,
-        and navigate - all through natural conversation.
-      </p>
-      <div className="space-y-2">
-        <p className="text-xs text-gray-500 uppercase tracking-wide mb-3">
-          Try asking:
-        </p>
-        <SuggestionChips onSelect={onSuggestionSelect} />
+    </button>
+  );
+}
+
+// Travel Copilot Home Screen
+function TravelHome() {
+  return (
+    <div className="flex flex-col h-full bg-gradient-to-b from-indigo-50 via-white to-white">
+      {/* Hero Section */}
+      <div className="flex flex-col items-center pt-8 pb-6 px-4">
+        <div className="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center mb-4 shadow-lg">
+          <MapPin className="w-8 h-8 text-white" />
+        </div>
+        <h1 className="text-xl font-semibold text-gray-900">Travel Copilot</h1>
+        <p className="text-sm text-gray-500 mt-1">Where would you like to explore?</p>
+      </div>
+
+      {/* Input */}
+      <div className="px-4 mb-6">
+        <CopilotChat.Input placeholder="Search places or ask anything..." />
+      </div>
+
+      {/* Quick Actions */}
+      <div className="px-4 mb-6">
+        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Quick Actions</h3>
+        <div className="grid grid-cols-2 gap-2">
+          <QuickActionChip
+            icon={Utensils}
+            label="Find restaurants"
+            message="Find restaurants near me"
+            color="orange"
+          />
+          <QuickActionChip
+            icon={Hotel}
+            label="Search hotels"
+            message="Search for hotels nearby"
+            color="indigo"
+          />
+          <QuickActionChip
+            icon={Landmark}
+            label="Attractions"
+            message="Show me popular attractions"
+            color="purple"
+          />
+          <QuickActionChip
+            icon={Navigation}
+            label="Get directions"
+            message="Get directions"
+            color="emerald"
+          />
+        </div>
+      </div>
+
+      {/* Popular Destinations */}
+      <div className="px-4 flex-1">
+        <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Popular Destinations</h3>
+        <div className="space-y-2">
+          <DestinationCard name="Paris" country="France" emoji="🗼" />
+          <DestinationCard name="Tokyo" country="Japan" emoji="🗾" />
+          <DestinationCard name="New York" country="United States" emoji="🗽" />
+          <DestinationCard name="Dubai" country="UAE" emoji="🏙️" />
+        </div>
       </div>
     </div>
   );
 }
 
-interface MessageBubbleProps {
-  message: {
-    id: string;
-    role: string;
-    content: string;
-  };
-  places?: Place[];
-}
+export function CopilotPanelContent() {
+  const { registeredTools, status, toolExecutions } = useCopilot();
 
-function MessageBubble({ message, places }: MessageBubbleProps) {
-  const isUser = message.role === 'user';
+  useEffect(() => {
+    console.log('[Copilot] Registered tools:', registeredTools?.map(t => t.name));
+  }, [registeredTools]);
+
+  useEffect(() => {
+    console.log('[Copilot] Status changed:', status);
+  }, [status]);
+
+  useEffect(() => {
+    console.log('[Copilot] Tool executions:', toolExecutions);
+  }, [toolExecutions]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}
-    >
-      {/* Avatar */}
-      <div
-        className={`
-          flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
-          ${isUser ? 'bg-gray-200' : 'bg-indigo-100'}
-        `}
+    <div className="h-full flex flex-col">
+      {/* Register AI tools */}
+      <CopilotToolsProvider />
+
+      {/* CopilotChat with compound components */}
+      <CopilotChat.Root
+        className="h-full flex-1 min-h-0"
+        assistantAvatar={{
+          fallback: '🗺️',
+        }}
+        userAvatar={{
+          fallback: '👤',
+        }}
+        showUserAvatar={false}
+        attachmentsEnabled={false}
+        placeholder="Search places or ask anything..."
+        toolRenderers={toolRenderers}
       >
-        {isUser ? (
-          <User className="w-4 h-4 text-gray-600" />
-        ) : (
-          <Bot className="w-4 h-4 text-indigo-600" />
-        )}
-      </div>
+        {/* Home view - shown when no messages */}
+        <CopilotChat.HomeView className="h-full">
+          <TravelHome />
+        </CopilotChat.HomeView>
 
-      {/* Content */}
-      <div className={`flex-1 max-w-[85%] ${isUser ? 'text-right' : ''}`}>
-        <div
-          className={`
-            inline-block px-4 py-2.5 rounded-2xl text-sm
-            ${
-              isUser
-                ? 'bg-indigo-600 text-white rounded-br-md'
-                : 'bg-gray-100 text-gray-900 rounded-bl-md'
-            }
-          `}
-        >
-          <p className="whitespace-pre-wrap">{message.content}</p>
-        </div>
-
-        {/* Place cards for assistant messages */}
-        {!isUser && places && places.length > 0 && (
-          <div className="mt-3">
-            {places.length === 1 ? (
-              <PlaceCard place={places[0]} variant="compact" />
-            ) : (
-              <PlaceCardCarousel places={places} />
-            )}
-          </div>
-        )}
-      </div>
-    </motion.div>
+        {/* Chat view - shown when there are messages */}
+        <CopilotChat.ChatView className="h-full flex-1 min-h-0 overflow-y-auto" />
+      </CopilotChat.Root>
+    </div>
   );
 }

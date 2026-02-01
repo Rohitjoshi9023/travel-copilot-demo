@@ -7,9 +7,12 @@ import {
   Minus,
   Compass,
   Locate,
-  Layers,
   Moon,
   Sun,
+  RotateCcw,
+  RotateCw,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import { useMapStore } from '@/stores/mapStore';
 
@@ -42,6 +45,23 @@ export function MapControls({
     setCamera({ tilt: 0, heading: 0 });
   }, [setCamera]);
 
+  // 3D-specific controls
+  const handleTiltUp = useCallback(() => {
+    setCamera({ tilt: Math.min((camera.tilt || 0) + 15, 85) });
+  }, [camera.tilt, setCamera]);
+
+  const handleTiltDown = useCallback(() => {
+    setCamera({ tilt: Math.max((camera.tilt || 0) - 15, 0) });
+  }, [camera.tilt, setCamera]);
+
+  const handleRotateLeft = useCallback(() => {
+    setCamera({ heading: ((camera.heading || 0) - 30 + 360) % 360 });
+  }, [camera.heading, setCamera]);
+
+  const handleRotateRight = useCallback(() => {
+    setCamera({ heading: ((camera.heading || 0) + 30) % 360 });
+  }, [camera.heading, setCamera]);
+
   return (
     <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10 flex flex-col gap-2">
       {/* Zoom controls */}
@@ -64,10 +84,45 @@ export function MapControls({
         <ControlButton
           icon={Compass}
           onClick={viewMode === 'map3d' ? handleResetTilt : handleResetNorth}
-          label="Reset north"
+          label="Reset view"
           rotation={camera.heading}
         />
       </div>
+
+      {/* 3D Controls - only show in 3D mode */}
+      {viewMode === 'map3d' && (
+        <>
+          {/* Tilt controls */}
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <ControlButton
+              icon={ChevronUp}
+              onClick={handleTiltUp}
+              label="Tilt up"
+            />
+            <div className="h-px bg-gray-200" />
+            <ControlButton
+              icon={ChevronDown}
+              onClick={handleTiltDown}
+              label="Tilt down"
+            />
+          </div>
+
+          {/* Rotation controls */}
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <ControlButton
+              icon={RotateCcw}
+              onClick={handleRotateLeft}
+              label="Rotate left"
+            />
+            <div className="h-px bg-gray-200" />
+            <ControlButton
+              icon={RotateCw}
+              onClick={handleRotateRight}
+              label="Rotate right"
+            />
+          </div>
+        </>
+      )}
 
       {/* Locate user */}
       {onLocateUser && (

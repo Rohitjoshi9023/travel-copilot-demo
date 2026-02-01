@@ -124,22 +124,66 @@ body {
   font-family: var(--font-sans) !important;
 }
 
+/* InfoWindow container */
 .gm-style .gm-style-iw-c {
-  padding: 0 !important;
-  border-radius: var(--radius-lg) !important;
-  box-shadow: var(--shadow-lg) !important;
+  padding: 12px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  max-width: 320px !important;
 }
 
+/* InfoWindow content - allow proper scrolling/sizing */
 .gm-style .gm-style-iw-d {
-  overflow: hidden !important;
+  overflow: auto !important;
+  max-height: 400px !important;
 }
 
+/* Hide the default arrow/tail */
 .gm-style .gm-style-iw-tc {
   display: none !important;
 }
 
+/* Hide the default close button chrome (we use our own) */
 .gm-style-iw-chr {
-  display: none !important;
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+}
+
+/* Style the close button */
+.gm-style .gm-style-iw-c button.gm-ui-hover-effect {
+  width: 28px !important;
+  height: 28px !important;
+  top: 4px !important;
+  right: 4px !important;
+}
+
+/* InfoWindow text colors - ensure visibility */
+.gm-style .gm-style-iw-d,
+.gm-style .gm-style-iw-d * {
+  color: #1f2937;
+}
+
+.gm-style .gm-style-iw-d h3 {
+  color: #111827 !important;
+  font-weight: 600 !important;
+}
+
+.gm-style .gm-style-iw-d p {
+  color: #4b5563 !important;
+}
+
+.gm-style .gm-style-iw-d a {
+  color: #2563eb !important;
+}
+
+/* Ensure buttons display properly in InfoWindow */
+.gm-style .gm-style-iw-d .flex {
+  display: flex !important;
+}
+
+.gm-style .gm-style-iw-d button {
+  cursor: pointer !important;
 }
 
 /* Remove Google Maps controls styling */
@@ -235,6 +279,270 @@ select {
   font-size: inherit;
 }
 
+/* Copilot SDK Layout Overrides */
+
+/* Root container setup */
+[data-copilot-root] {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Message scroll area - target multiple possible selectors */
+[data-copilot-root] [data-stick-to-bottom],
+[data-copilot-root] [class*="scroll"],
+[data-copilot-root] [class*="messages"],
+[data-copilot-root] [class*="chat-view"],
+[data-copilot-root] [class*="ChatView"],
+[data-copilot-root] > div:first-child {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+}
+
+/* Ensure the chat view container allows scrolling */
+[data-copilot-root] [class*="chat"] {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+/* Messages container should scroll */
+[data-copilot-root] [class*="message-list"],
+[data-copilot-root] [class*="MessageList"],
+[data-copilot-root] [class*="messages-container"] {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+}
+
+/* Scrollbar styling for chat */
+[data-copilot-root] [data-stick-to-bottom],
+[data-copilot-root] [class*="scroll"],
+[data-copilot-root] [class*="messages"] {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+[data-copilot-root] [data-stick-to-bottom]::-webkit-scrollbar,
+[data-copilot-root] [class*="scroll"]::-webkit-scrollbar,
+[data-copilot-root] [class*="messages"]::-webkit-scrollbar {
+  width: 6px;
+}
+
+[data-copilot-root] [data-stick-to-bottom]::-webkit-scrollbar-thumb,
+[data-copilot-root] [class*="scroll"]::-webkit-scrollbar-thumb,
+[data-copilot-root] [class*="messages"]::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 3px;
+}
+
+[data-copilot-root] [data-stick-to-bottom]::-webkit-scrollbar-thumb:hover,
+[data-copilot-root] [class*="scroll"]::-webkit-scrollbar-thumb:hover,
+[data-copilot-root] [class*="messages"]::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+/* Input area container */
+.csdk-input,
+.csdk-compound-input {
+  flex-shrink: 0 !important;
+  background: #f3f4f6;
+  padding: 1rem;
+}
+
+/* Input container - the rounded card */
+.csdk-input,
+.csdk-compound-input {
+  background: white !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 1rem !important;
+  padding: 0.75rem 0.75rem 0.75rem 1rem !important;
+  margin: 0.75rem !important;
+  min-height: 3.5rem !important;
+}
+
+.csdk-input *,
+.csdk-compound-input * {
+  flex-wrap: nowrap !important;
+}
+
+/* The form or wrapper that contains textarea + button */
+.csdk-input form,
+.csdk-input > div,
+.csdk-compound-input form,
+.csdk-compound-input > div {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-end !important;
+  gap: 0.75rem !important;
+  flex-wrap: nowrap !important;
+}
+
+/* Input textarea styling */
+.csdk-input-textarea,
+.csdk-input textarea,
+.csdk-compound-input textarea,
+[data-copilot-root] textarea {
+  border: none !important;
+  padding: 0.375rem 0 !important;
+  font-size: 0.9375rem !important;
+  background: transparent !important;
+  resize: none !important;
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  min-height: 1.75rem !important;
+  max-height: 8rem !important;
+  line-height: 1.5 !important;
+  order: 0 !important;
+  color: #1f2937 !important;
+  caret-color: #1f2937 !important;
+}
+
+.csdk-input-textarea::placeholder,
+.csdk-input textarea::placeholder,
+.csdk-compound-input textarea::placeholder,
+[data-copilot-root] textarea::placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+.csdk-input-textarea:focus,
+.csdk-input textarea:focus,
+.csdk-compound-input textarea:focus,
+[data-copilot-root] textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  color: #1f2937 !important;
+}
+
+/* Hide attachment button */
+.csdk-button-attach {
+  display: none !important;
+}
+
+/* Circular send button - position on right */
+.csdk-button-send,
+[class*="csdk"] button[type="submit"],
+.csdk-input button,
+.csdk-compound-input button {
+  background: #4b5563 !important;
+  color: white !important;
+  border-radius: 50% !important;
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  min-width: 2.25rem !important;
+  max-width: 2.25rem !important;
+  min-height: 2.25rem !important;
+  max-height: 2.25rem !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 2.25rem !important;
+  margin: 0 !important;
+  margin-left: auto !important;
+  order: 99 !important;
+}
+
+.csdk-button-send:hover,
+[class*="csdk"] button[type="submit"]:hover,
+.csdk-input button:hover {
+  background: #374151 !important;
+}
+
+.csdk-button-send svg,
+[class*="csdk"] button[type="submit"] svg,
+.csdk-input button svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+/* Override SDK CSS variables for better contrast */
+[data-copilot-root] {
+  --foreground: hsl(240 10% 10%) !important;
+  --muted-foreground: hsl(240 5% 30%) !important;
+}
+
+/* Message styling - Assistant */
+.csdk-message-assistant,
+[data-copilot-root] [class*="assistant"],
+[class*="csdk"][class*="assistant"] {
+  background: #f3f4f6 !important;
+  border-radius: 1rem !important;
+  padding: 0.75rem 1rem !important;
+  color: #1f2937 !important;
+}
+
+.csdk-message-assistant *,
+[data-copilot-root] [class*="assistant"] *,
+[class*="csdk"][class*="assistant"] * {
+  color: #1f2937 !important;
+}
+
+/* Message styling - User */
+.csdk-message-user,
+[data-copilot-root] [class*="user-message"],
+[class*="csdk"][class*="user"] {
+  background: #6366f1 !important;
+  border-radius: 1rem !important;
+  padding: 0.75rem 1rem !important;
+  color: white !important;
+}
+
+.csdk-message-user *,
+[data-copilot-root] [class*="user-message"] *,
+[class*="csdk"][class*="user"] * {
+  color: white !important;
+}
+
+/* Ensure all message content text is visible */
+[data-copilot-root] [class*="message"] p,
+[data-copilot-root] [class*="message"] span,
+[data-copilot-root] [class*="message"] div,
+[data-copilot-root] [class*="content"] p,
+[data-copilot-root] [class*="content"] span {
+  color: inherit !important;
+}
+
+/* Force dark text on any prose/markdown content */
+[data-copilot-root] .prose,
+[data-copilot-root] [class*="markdown"],
+[data-copilot-root] [class*="Markdown"] {
+  color: #1f2937 !important;
+}
+
+[data-copilot-root] .prose *,
+[data-copilot-root] [class*="markdown"] *,
+[data-copilot-root] [class*="Markdown"] * {
+  color: inherit !important;
+}
+
+/* Avatar - smaller size and hide default SVG icons */
+.csdk-avatar {
+  width: 28px !important;
+  height: 28px !important;
+  font-size: 14px !important;
+}
+
+.csdk-avatar svg,
+.csdk-avatar img[src=""] {
+  display: none !important;
+}
+
+/* Tool step styling */
+[data-tool-step] {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
 /* Copilot SDK custom styles */
 .copilot-message {
   word-wrap: break-word;
@@ -322,4 +630,198 @@ select {
   .glass {
     background: rgba(0, 0, 0, 0.8);
   }
+}
+
+/* ===========================================
+   Tool Animation Keyframes
+   =========================================== */
+
+/* Airplane flight path animation */
+@keyframes fly-path {
+  0% {
+    offset-distance: 0%;
+    transform: rotate(-30deg);
+  }
+  50% {
+    transform: rotate(-45deg);
+  }
+  100% {
+    offset-distance: 100%;
+    transform: rotate(30deg);
+  }
+}
+
+/* Radar pulse expanding rings */
+@keyframes radar-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Pin drop with bounce */
+@keyframes pin-drop {
+  0% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-10px);
+  }
+  90% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Route line drawing */
+@keyframes draw-route {
+  0% {
+    stroke-dashoffset: 1000;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Checkmark draw animation */
+@keyframes draw-check {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Sweep animation for clearing */
+@keyframes sweep {
+  0% {
+    left: 0%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Zoom pulse animation */
+@keyframes zoom-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+/* Fade scale in animation */
+@keyframes fade-scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Slide in from right */
+@keyframes slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Ripple effect */
+@keyframes ripple {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Tool renderer utility classes */
+.animate-fly-path {
+  animation: fly-path 1.5s ease-in-out infinite;
+}
+
+.animate-radar-pulse {
+  animation: radar-pulse 2s ease-out infinite;
+}
+
+.animate-pin-drop {
+  animation: pin-drop 0.8s ease-out forwards;
+}
+
+.animate-draw-route {
+  animation: draw-route 1s ease-out forwards;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+}
+
+.animate-draw-check {
+  animation: draw-check 0.3s ease-out forwards;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+}
+
+.animate-sweep {
+  animation: sweep 0.8s linear infinite;
+}
+
+.animate-zoom-pulse {
+  animation: zoom-pulse 1s ease-in-out infinite;
+}
+
+.animate-fade-scale-in {
+  animation: fade-scale-in 0.3s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out forwards;
+}
+
+.animate-ripple {
+  animation: ripple 0.5s ease-out forwards;
+}
+
+/* Tool renderer card styles */
+.tool-renderer-card {
+  @apply rounded-lg border p-3 my-2 transition-all;
+}
+
+.tool-renderer-card--pending {
+  @apply bg-gray-50 border-gray-200;
+}
+
+.tool-renderer-card--executing {
+  @apply bg-indigo-50 border-indigo-200;
+}
+
+.tool-renderer-card--completed {
+  @apply bg-emerald-50 border-emerald-200;
+}
+
+.tool-renderer-card--error {
+  @apply bg-red-50 border-red-200;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { AdvancedMarker, InfoWindow, useAdvancedMarkerRef } from '@vis.gl/react-google-maps';
 import { motion } from 'framer-motion';
 import {
@@ -10,9 +10,17 @@ import {
   ShoppingBag,
   Bus,
   MapPin,
+  Star,
+  Phone,
+  Globe,
+  Clock,
+  Navigation,
+  Plus,
+  Check,
 } from 'lucide-react';
 import { config } from '@/lib/config';
-import type { Marker, PlaceType } from '@/types';
+import { usePlacesStore } from '@/stores/placesStore';
+import type { Marker, PlaceType, Place } from '@/types';
 
 interface CustomMarkerProps {
   marker: Marker;
@@ -30,6 +38,192 @@ const iconMap: Record<PlaceType, React.ComponentType<{ className?: string }>> = 
   other: MapPin,
 };
 
+// Price level display
+function PriceLevel({ level }: { level?: number }) {
+  if (!level) return null;
+  return (
+    <span className="text-gray-600 text-xs">
+      {'$'.repeat(level)}
+      <span className="text-gray-300">{'$'.repeat(4 - level)}</span>
+    </span>
+  );
+}
+
+// Info Window Content Component
+function InfoWindowContent({
+  marker,
+  place,
+  onAddToItinerary,
+  onGetDirections,
+}: {
+  marker: Marker;
+  place?: Place;
+  onAddToItinerary?: () => void;
+  onGetDirections?: () => void;
+}) {
+  const [isAdded, setIsAdded] = useState(false);
+  const color = config.ui.markerColors[marker.type];
+
+  const handleAddClick = () => {
+    onAddToItinerary?.();
+    setIsAdded(true);
+    // Reset after 2 seconds
+    setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  return (
+    <div className="min-w-[250px] max-w-[300px]">
+      {/* Header with icon and title */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '8px' }}>
+        <div
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 8,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            backgroundColor: color,
+          }}
+        >
+          {(() => {
+            const Icon = iconMap[marker.type];
+            return <Icon style={{ width: 20, height: 20, color: 'white', stroke: 'white' }} />;
+          })()}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-gray-900 text-sm leading-tight">
+            {marker.title}
+          </h3>
+          <p className="text-xs text-gray-500 capitalize">{marker.type}</p>
+        </div>
+      </div>
+
+      {/* Place details if available */}
+      {place && (
+        <div className="space-y-2 border-t border-gray-100 pt-2 mt-2">
+          {/* Rating and price */}
+          <div className="flex items-center gap-3">
+            {place.rating && (
+              <div className="flex items-center gap-1">
+                <Star style={{ width: 14, height: 14, color: '#fbbf24', fill: '#fbbf24', stroke: '#fbbf24' }} />
+                <span className="text-sm font-medium text-gray-800">{place.rating}</span>
+                {place.userRatingsTotal && (
+                  <span className="text-xs text-gray-500">
+                    ({place.userRatingsTotal.toLocaleString()})
+                  </span>
+                )}
+              </div>
+            )}
+            <PriceLevel level={place.priceLevel} />
+          </div>
+
+          {/* Address */}
+          {place.address && (
+            <p className="text-xs text-gray-600 line-clamp-2">
+              {place.address}
+            </p>
+          )}
+
+          {/* Open status */}
+          {place.openingHours && (
+            <div className="flex items-center gap-1.5">
+              <Clock style={{ width: 14, height: 14, color: '#9ca3af', stroke: '#9ca3af' }} />
+              <span className={`text-xs font-medium ${
+                place.openingHours.openNow ? 'text-emerald-600' : 'text-red-500'
+              }`}>
+                {place.openingHours.openNow ? 'Open now' : 'Closed'}
+              </span>
+            </div>
+          )}
+
+          {/* Contact info */}
+          <div className="flex items-center gap-3">
+            {place.phone && (
+              <a
+                href={`tel:${place.phone}`}
+                className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
+              >
+                <Phone style={{ width: 12, height: 12, stroke: 'currentColor' }} />
+                <span>Call</span>
+              </a>
+            )}
+            {place.website && (
+              <a
+                href={place.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-xs text-blue-600 hover:underline"
+              >
+                <Globe style={{ width: 12, height: 12, stroke: 'currentColor' }} />
+                <span>Website</span>
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Action buttons */}
+      <div style={{ display: 'flex', gap: '8px', marginTop: '12px', paddingTop: '8px', borderTop: '1px solid #e5e7eb' }}>
+        <button
+          onClick={onGetDirections}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '8px 12px',
+            fontSize: '12px',
+            fontWeight: 500,
+            color: '#374151',
+            backgroundColor: '#f3f4f6',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer',
+          }}
+        >
+          <Navigation style={{ width: 14, height: 14, color: '#374151', stroke: '#374151' }} />
+          Directions
+        </button>
+        <button
+          onClick={handleAddClick}
+          disabled={isAdded}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '8px 12px',
+            fontSize: '12px',
+            fontWeight: 500,
+            color: 'white',
+            backgroundColor: isAdded ? '#10b981' : '#6366f1',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: isAdded ? 'default' : 'pointer',
+            transition: 'background-color 0.2s',
+          }}
+        >
+          {isAdded ? (
+            <>
+              <Check style={{ width: 14, height: 14, color: 'white', stroke: 'white' }} />
+              Added!
+            </>
+          ) : (
+            <>
+              <Plus style={{ width: 14, height: 14, color: 'white', stroke: 'white' }} />
+              Add to Trip
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function CustomMarker({
   marker,
   onClick,
@@ -37,10 +231,29 @@ export function CustomMarker({
   showInfoWindow = false,
 }: CustomMarkerProps) {
   const [markerRef, advancedMarker] = useAdvancedMarkerRef();
+  const places = usePlacesStore((s) => s.places);
+  const addToItinerary = usePlacesStore((s) => s.addToItinerary);
+
+  // Find place details from places store using placeId
+  const place = marker.placeId
+    ? places.find((p) => p.placeId === marker.placeId)
+    : undefined;
 
   const handleClick = useCallback(() => {
     onClick?.(marker.id);
   }, [marker.id, onClick]);
+
+  const handleAddToItinerary = useCallback(() => {
+    if (place) {
+      addToItinerary(place, 1);
+    }
+  }, [place, addToItinerary]);
+
+  const handleGetDirections = useCallback(() => {
+    // Open Google Maps directions in a new tab
+    const destination = `${marker.position.lat},${marker.position.lng}`;
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${destination}`, '_blank');
+  }, [marker.position]);
 
   const Icon = iconMap[marker.type];
   const color = config.ui.markerColors[marker.type];
@@ -67,7 +280,7 @@ export function CustomMarker({
             className="flex items-center justify-center w-10 h-10 rounded-full shadow-lg cursor-pointer transition-transform hover:scale-110"
             style={{ backgroundColor: color }}
           >
-            <Icon className="w-5 h-5 text-white" />
+            <Icon style={{ width: 20, height: 20, color: 'white', stroke: 'white' }} />
           </div>
           {/* Pin tail */}
           <div
@@ -94,13 +307,13 @@ export function CustomMarker({
         <InfoWindow
           anchor={advancedMarker}
           onCloseClick={onInfoWindowClose}
-          headerContent={
-            <h3 className="font-semibold text-gray-900">{marker.title}</h3>
-          }
         >
-          <div className="p-2 min-w-[200px]">
-            <p className="text-sm text-gray-600 capitalize">{marker.type}</p>
-          </div>
+          <InfoWindowContent
+            marker={marker}
+            place={place}
+            onAddToItinerary={handleAddToItinerary}
+            onGetDirections={handleGetDirections}
+          />
         </InfoWindow>
       )}
     </>
