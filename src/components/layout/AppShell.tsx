@@ -11,6 +11,7 @@ import {
   Map,
 } from 'lucide-react';
 import { MapContainer } from '@/components/map/MapContainer';
+import { MapAIContext } from '@/components/map/MapAIContext';
 import { CopilotPanel, CopilotBottomSheet } from '@/components/chat/CopilotPanel';
 import { TripSelector } from '@/components/trips/TripSelector';
 import { usePlaces } from '@/hooks/usePlaces';
@@ -62,8 +63,11 @@ export function AppShell({ googleMapsApiKey }: AppShellProps) {
       maxIterations={10}
       onError={handleCopilotError}
       debug={true}
-      streaming={false}
+      streaming={true}
     >
+      {/* Provide map context to AI */}
+      <MapAIContext />
+
       <div className="h-screen w-screen overflow-hidden bg-gray-100">
         {/* Header */}
         <header className="absolute top-0 left-0 right-0 z-30 pointer-events-none">
@@ -146,7 +150,7 @@ export function AppShell({ googleMapsApiKey }: AppShellProps) {
         <div
           className={`
             absolute inset-0 transition-all duration-300
-            ${isChatOpen && !isMobile ? 'right-96' : ''}
+            ${isChatOpen && !isMobile ? 'right-[420px]' : ''}
           `}
         >
           <MapContainer
@@ -169,7 +173,7 @@ export function AppShell({ googleMapsApiKey }: AppShellProps) {
                   animate={{ x: 0 }}
                   exit={{ x: '100%' }}
                   transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                  className="fixed right-0 top-0 bottom-0 w-96 z-20"
+                  className="fixed right-0 top-0 bottom-0 w-[420px] z-40"
                 >
                   <CopilotPanel isOpen={true} onClose={toggleChat} />
                 </motion.div>

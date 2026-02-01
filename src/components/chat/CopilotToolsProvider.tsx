@@ -367,7 +367,7 @@ function AddToItineraryTool() {
 
   useTool({
     name: 'addToItinerary',
-    description: 'Add a place to the active trip itinerary. If no trip exists, creates one automatically.',
+    description: 'Add a place to the active trip itinerary. If no trip exists, creates one automatically. You can also set the day\'s title and description when adding places.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -380,17 +380,21 @@ function AddToItineraryTool() {
           enum: ['accommodation', 'activity', 'dining', 'transport', 'sightseeing', 'other'],
           description: 'Category of the place'
         },
+        dayTitle: { type: 'string', description: 'Optional title for the day (e.g., "Beach Day", "City Exploration")' },
+        dayDescription: { type: 'string', description: 'Optional description of the day\'s activities' },
       },
       required: ['placeName'],
     },
-    handler: async ({ placeName, placeId, day, tripId, category }: {
+    handler: async ({ placeName, placeId, day, tripId, category, dayTitle, dayDescription }: {
       placeName: string;
       placeId?: string;
       day?: number;
       tripId?: string;
       category?: TripItemCategory;
+      dayTitle?: string;
+      dayDescription?: string;
     }) => {
-      console.log('[Frontend Tool] addToItinerary called:', { placeName, placeId, day, tripId, category });
+      console.log('[Frontend Tool] addToItinerary called:', { placeName, placeId, day, tripId, category, dayTitle, dayDescription });
       try {
         // Determine which trip to use
         let targetTripId = tripId || tripsStoreRef.current.activeTripId;
@@ -417,14 +421,26 @@ function AddToItineraryTool() {
         }
 
         if (place) {
-          tripsStoreRef.current.addItemToTrip(targetTripId, place, day ?? 1, category);
+          const targetDay = day ?? 1;
+          tripsStoreRef.current.addItemToTrip(targetTripId, place, targetDay, category);
+
+          // Update day info if provided
+          if (dayTitle || dayDescription) {
+            tripsStoreRef.current.updateDayInfo(targetTripId, targetDay, {
+              title: dayTitle?.trim() || undefined,
+              description: dayDescription?.trim() || undefined,
+            });
+          }
+
           const trip = tripsStoreRef.current.getTripById(targetTripId);
           return {
             success: true,
             place: place.name,
-            day: day ?? 1,
+            day: targetDay,
             tripName: trip?.name,
             tripId: targetTripId,
+            dayTitle: dayTitle?.trim(),
+            dayDescription: dayDescription?.trim(),
           };
         }
         return { success: false, error: 'Place not found' };
@@ -537,6 +553,460 @@ function ListTripsTool() {
   return null;
 }
 
+function DeleteTripTool() {
+  const tripsStore = useTripsStore();
+  const tripsStoreRef = useLatest(tripsStore);
+
+  useTool({
+    name: 'deleteTrip',
+    description: 'Delete an entire trip. IMPORTANT: Always call this first with confirmed=false to show the user what will be deleted and ask for confirmation. Only call with confirmed=true after the user explicitly agrees to delete.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        tripId: { type: 'string', description: 'The ID of the trip to delete' },
+        tripName: { type: 'string', description: 'The name of the trip to delete (alternative to tripId)' },
+        confirmed: { type: 'boolean', description: 'Set to true only after user confirms deletion. Default is false.' },
+      },
+    },
+    handler: async ({ tripId, tripName, confirmed }: { tripId?: string; tripName?: string; confirmed?: boolean }) => {
+      console.log('[Frontend Tool] deleteTrip called:', { tripId, tripName, confirmed });
+      try {
+        const trips = tripsStoreRef.current.trips;
+        const targetTrip = tripId
+          ? trips.find((t) => t.id === tripId)
+          : trips.find((t) => t.name.toLowerCase() === tripName?.toLowerCase());
+
+        if (!targetTrip) {
+          return { success: false, error: 'Trip not found' };
+        }
+
+        // If not confirmed, return trip details and ask for confirmation
+        if (!confirmed) {
+          return {
+            success: false,
+            requiresConfirmation: true,
+            tripToDelete: {
+              id: targetTrip.id,
+              name: targetTrip.name,
+              destination: targetTrip.destination,
+              itemCount: targetTrip.items.length,
+              daysCount: targetTrip.daysCount,
+            },
+            message: `Are you sure you want to delete "${targetTrip.name}"? This trip has ${targetTrip.items.length} places across ${targetTrip.daysCount} days. This action cannot be undone. Please confirm to proceed.`,
+          };
+        }
+
+        // User confirmed, proceed with deletion
+        tripsStoreRef.current.deleteTrip(targetTrip.id);
+        return {
+          success: true,
+          message: `Deleted trip "${targetTrip.name}"`,
+          deletedTripName: targetTrip.name,
+        };
+      } catch {
+        return { success: false, error: 'Failed to delete trip' };
+      }
+    },
+  });
+
+  return null;
+}
+
+function DeleteTripItemTool() {
+  const tripsStore = useTripsStore();
+  const tripsStoreRef = useLatest(tripsStore);
+
+  useTool({
+    name: 'deleteTripItem',
+    description: 'Delete a place from the trip itinerary. Can delete by place name.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        placeName: { type: 'string', description: 'Name of the place to remove' },
+        tripId: { type: 'string', description: 'Trip ID (uses active trip if not provided)' },
+      },
+      required: ['placeName'],
+    },
+    handler: async ({ placeName, tripId }: { placeName: string; tripId?: string }) => {
+      console.log('[Frontend Tool] deleteTripItem called:', { placeName, tripId });
+      try {
+        const targetTripId = tripId || tripsStoreRef.current.activeTripId;
+        if (!targetTripId) {
+          return { success: false, error: 'No active trip' };
+        }
+
+        const trip = tripsStoreRef.current.getTripById(targetTripId);
+        if (!trip) {
+          return { success: false, error: 'Trip not found' };
+        }
+
+        const item = trip.items.find(
+          (i) => i.place.name.toLowerCase().includes(placeName.toLowerCase())
+        );
+
+        if (!item) {
+          return { success: false, error: `Place "${placeName}" not found in trip` };
+        }
+
+        tripsStoreRef.current.removeItemFromTrip(targetTripId, item.id);
+        return {
+          success: true,
+          message: `Removed "${item.place.name}" from ${trip.name}`,
+          removedPlace: item.place.name,
+          fromDay: item.day,
+        };
+      } catch {
+        return { success: false, error: 'Failed to delete item' };
+      }
+    },
+  });
+
+  return null;
+}
+
+function MoveTripItemTool() {
+  const tripsStore = useTripsStore();
+  const tripsStoreRef = useLatest(tripsStore);
+
+  useTool({
+    name: 'moveTripItem',
+    description: 'Move a place to a different day in the trip itinerary.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        placeName: { type: 'string', description: 'Name of the place to move' },
+        toDay: { type: 'number', description: 'Target day number to move the place to' },
+        tripId: { type: 'string', description: 'Trip ID (uses active trip if not provided)' },
+      },
+      required: ['placeName', 'toDay'],
+    },
+    handler: async ({ placeName, toDay, tripId }: { placeName: string; toDay: number; tripId?: string }) => {
+      console.log('[Frontend Tool] moveTripItem called:', { placeName, toDay, tripId });
+      try {
+        const targetTripId = tripId || tripsStoreRef.current.activeTripId;
+        if (!targetTripId) {
+          return { success: false, error: 'No active trip' };
+        }
+
+        const trip = tripsStoreRef.current.getTripById(targetTripId);
+        if (!trip) {
+          return { success: false, error: 'Trip not found' };
+        }
+
+        const item = trip.items.find(
+          (i) => i.place.name.toLowerCase().includes(placeName.toLowerCase())
+        );
+
+        if (!item) {
+          return { success: false, error: `Place "${placeName}" not found in trip` };
+        }
+
+        const fromDay = item.day;
+        const targetDayItems = trip.items.filter((i) => i.day === toDay);
+        tripsStoreRef.current.moveTripItem(targetTripId, item.id, toDay, targetDayItems.length);
+
+        return {
+          success: true,
+          message: `Moved "${item.place.name}" from Day ${fromDay} to Day ${toDay}`,
+          movedPlace: item.place.name,
+          fromDay,
+          toDay,
+        };
+      } catch {
+        return { success: false, error: 'Failed to move item' };
+      }
+    },
+  });
+
+  return null;
+}
+
+function RemovePlacesFromTripTool() {
+  const tripsStore = useTripsStore();
+  const tripsStoreRef = useLatest(tripsStore);
+
+  useTool({
+    name: 'removePlacesFromTrip',
+    description: 'Remove multiple places from the trip at once. Can remove by place names or clear all places from a specific day.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        placeNames: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'List of place names to remove',
+        },
+        fromDay: { type: 'number', description: 'Delete all items from this day (alternative to placeNames)' },
+        tripId: { type: 'string', description: 'Trip ID (uses active trip if not provided)' },
+      },
+    },
+    handler: async ({ placeNames, fromDay, tripId }: { placeNames?: string[]; fromDay?: number; tripId?: string }) => {
+      console.log('[Frontend Tool] removePlacesFromTrip called:', { placeNames, fromDay, tripId });
+      try {
+        const targetTripId = tripId || tripsStoreRef.current.activeTripId;
+        if (!targetTripId) {
+          return { success: false, error: 'No active trip' };
+        }
+
+        const trip = tripsStoreRef.current.getTripById(targetTripId);
+        if (!trip) {
+          return { success: false, error: 'Trip not found' };
+        }
+
+        let itemsToDelete: typeof trip.items = [];
+
+        if (fromDay !== undefined) {
+          // Delete all items from a specific day
+          itemsToDelete = trip.items.filter((i) => i.day === fromDay);
+        } else if (placeNames && placeNames.length > 0) {
+          // Delete specific places by name
+          itemsToDelete = trip.items.filter((item) =>
+            placeNames.some((name) => item.place.name.toLowerCase().includes(name.toLowerCase()))
+          );
+        }
+
+        if (itemsToDelete.length === 0) {
+          return { success: false, error: 'No matching items found to delete' };
+        }
+
+        const deletedNames: string[] = [];
+        for (const item of itemsToDelete) {
+          tripsStoreRef.current.removeItemFromTrip(targetTripId, item.id);
+          deletedNames.push(item.place.name);
+        }
+
+        return {
+          success: true,
+          message: `Deleted ${deletedNames.length} places from ${trip.name}`,
+          deletedPlaces: deletedNames,
+          count: deletedNames.length,
+        };
+      } catch {
+        return { success: false, error: 'Failed to delete items' };
+      }
+    },
+  });
+
+  return null;
+}
+
+function ReschedulePlacesTool() {
+  const tripsStore = useTripsStore();
+  const tripsStoreRef = useLatest(tripsStore);
+
+  useTool({
+    name: 'reschedulePlaces',
+    description: 'Move multiple places to a different day at once. Can move specific places by name or all places from one day to another.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        placeNames: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'List of place names to move',
+        },
+        fromDay: { type: 'number', description: 'Move all items from this day (alternative to placeNames)' },
+        toDay: { type: 'number', description: 'Target day number to move the places to' },
+        tripId: { type: 'string', description: 'Trip ID (uses active trip if not provided)' },
+      },
+      required: ['toDay'],
+    },
+    handler: async ({ placeNames, fromDay, toDay, tripId }: {
+      placeNames?: string[];
+      fromDay?: number;
+      toDay: number;
+      tripId?: string;
+    }) => {
+      console.log('[Frontend Tool] reschedulePlaces called:', { placeNames, fromDay, toDay, tripId });
+      try {
+        const targetTripId = tripId || tripsStoreRef.current.activeTripId;
+        if (!targetTripId) {
+          return { success: false, error: 'No active trip' };
+        }
+
+        const trip = tripsStoreRef.current.getTripById(targetTripId);
+        if (!trip) {
+          return { success: false, error: 'Trip not found' };
+        }
+
+        let itemsToMove: typeof trip.items = [];
+
+        if (fromDay !== undefined) {
+          // Move all items from a specific day
+          itemsToMove = trip.items.filter((i) => i.day === fromDay && i.day !== toDay);
+        } else if (placeNames && placeNames.length > 0) {
+          // Move specific places by name
+          itemsToMove = trip.items.filter((item) =>
+            placeNames.some((name) => item.place.name.toLowerCase().includes(name.toLowerCase()))
+          );
+        }
+
+        if (itemsToMove.length === 0) {
+          return { success: false, error: 'No matching items found to move' };
+        }
+
+        const movedNames: string[] = [];
+        for (const item of itemsToMove) {
+          const targetDayItems = tripsStoreRef.current.getTripById(targetTripId)?.items.filter((i) => i.day === toDay) || [];
+          tripsStoreRef.current.moveTripItem(targetTripId, item.id, toDay, targetDayItems.length);
+          movedNames.push(item.place.name);
+        }
+
+        return {
+          success: true,
+          message: `Moved ${movedNames.length} places to Day ${toDay}`,
+          movedPlaces: movedNames,
+          toDay,
+          count: movedNames.length,
+        };
+      } catch {
+        return { success: false, error: 'Failed to move items' };
+      }
+    },
+  });
+
+  return null;
+}
+
+function GetTripDetailsTool() {
+  const tripsStore = useTripsStore();
+  const tripsStoreRef = useLatest(tripsStore);
+
+  useTool({
+    name: 'getTripDetails',
+    description: 'Get detailed information about a trip including all places organized by day.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        tripId: { type: 'string', description: 'Trip ID (uses active trip if not provided)' },
+      },
+    },
+    handler: async ({ tripId }: { tripId?: string }) => {
+      console.log('[Frontend Tool] getTripDetails called:', { tripId });
+      try {
+        const targetTripId = tripId || tripsStoreRef.current.activeTripId;
+        if (!targetTripId) {
+          return { success: false, error: 'No active trip' };
+        }
+
+        const trip = tripsStoreRef.current.getTripById(targetTripId);
+        if (!trip) {
+          return { success: false, error: 'Trip not found' };
+        }
+
+        // Organize items by day with day info
+        const itinerary: Record<number, {
+          title?: string;
+          description?: string;
+          places: { name: string; type: string; time?: string }[]
+        }> = {};
+
+        // Initialize all days up to daysCount
+        for (let day = 1; day <= trip.daysCount; day++) {
+          const dayInfo = trip.dayInfo?.[day];
+          itinerary[day] = {
+            title: dayInfo?.title,
+            description: dayInfo?.description,
+            places: [],
+          };
+        }
+
+        // Add places to their respective days
+        for (const item of trip.items) {
+          if (!itinerary[item.day]) {
+            itinerary[item.day] = { places: [] };
+          }
+          itinerary[item.day].places.push({
+            name: item.place.name,
+            type: item.place.type,
+            time: item.startTime,
+          });
+        }
+
+        return {
+          success: true,
+          trip: {
+            id: trip.id,
+            name: trip.name,
+            destination: trip.destination,
+            status: trip.status,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+            daysCount: trip.daysCount,
+            totalPlaces: trip.items.length,
+          },
+          itinerary,
+        };
+      } catch {
+        return { success: false, error: 'Failed to get trip details' };
+      }
+    },
+  });
+
+  return null;
+}
+
+function UpdateDayInfoTool() {
+  const tripsStore = useTripsStore();
+  const tripsStoreRef = useLatest(tripsStore);
+
+  useTool({
+    name: 'updateDayInfo',
+    description: 'Set or update the title and description for a specific day in the trip. Use this to give each day a meaningful name like "Beach Day" or "City Exploration" and add a brief description of planned activities.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        day: { type: 'number', description: 'The day number to update (e.g., 1, 2, 3)' },
+        title: { type: 'string', description: 'A short title for the day (e.g., "Beach & Adventure", "Cultural Exploration", "Shopping Day")' },
+        description: { type: 'string', description: 'Brief description of the day\'s activities or theme' },
+        tripId: { type: 'string', description: 'Trip ID (uses active trip if not provided)' },
+      },
+      required: ['day'],
+    },
+    handler: async ({ day, title, description, tripId }: {
+      day: number;
+      title?: string;
+      description?: string;
+      tripId?: string;
+    }) => {
+      console.log('[Frontend Tool] updateDayInfo called:', { day, title, description, tripId });
+      try {
+        const targetTripId = tripId || tripsStoreRef.current.activeTripId;
+        if (!targetTripId) {
+          return { success: false, error: 'No active trip' };
+        }
+
+        const trip = tripsStoreRef.current.getTripById(targetTripId);
+        if (!trip) {
+          return { success: false, error: 'Trip not found' };
+        }
+
+        if (day < 1 || day > trip.daysCount) {
+          return { success: false, error: `Invalid day number. Trip has ${trip.daysCount} days.` };
+        }
+
+        tripsStoreRef.current.updateDayInfo(targetTripId, day, {
+          title: title?.trim() || undefined,
+          description: description?.trim() || undefined,
+        });
+
+        return {
+          success: true,
+          message: `Updated Day ${day}${title ? `: "${title}"` : ''}`,
+          day,
+          title: title?.trim(),
+          description: description?.trim(),
+          tripName: trip.name,
+        };
+      } catch {
+        return { success: false, error: 'Failed to update day info' };
+      }
+    },
+  });
+
+  return null;
+}
+
 // ===========================================
 // Main Provider Component
 // ===========================================
@@ -556,6 +1026,13 @@ export function CopilotToolsProvider() {
       <AddToItineraryTool />
       <CreateTripTool />
       <ListTripsTool />
+      <DeleteTripTool />
+      <DeleteTripItemTool />
+      <MoveTripItemTool />
+      <RemovePlacesFromTripTool />
+      <ReschedulePlacesTool />
+      <GetTripDetailsTool />
+      <UpdateDayInfoTool />
     </>
   );
 }

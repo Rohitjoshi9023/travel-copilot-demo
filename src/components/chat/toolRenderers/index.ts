@@ -11,6 +11,15 @@ import { AddToItineraryRenderer } from './AddToItineraryRenderer';
 import { AdjustZoomRenderer } from './AdjustZoomRenderer';
 import { CreateTripRenderer } from './CreateTripRenderer';
 import { ListTripsRenderer } from './ListTripsRenderer';
+import {
+  DeleteTripRenderer,
+  DeleteTripItemRenderer,
+  MoveTripItemRenderer,
+  RemovePlacesFromTripRenderer,
+  ReschedulePlacesRenderer,
+  GetTripDetailsRenderer,
+  UpdateDayInfoRenderer,
+} from './TripManagementRenderers';
 import type { ToolExecution } from './ToolRendererWrapper';
 
 // Type for a tool renderer that accepts an execution prop
@@ -30,6 +39,13 @@ export const toolRenderers: Record<string, ToolRenderer> = {
   adjustZoom: AdjustZoomRenderer,
   createTrip: CreateTripRenderer,
   listTrips: ListTripsRenderer,
+  deleteTrip: DeleteTripRenderer,
+  deleteTripItem: DeleteTripItemRenderer,
+  moveTripItem: MoveTripItemRenderer,
+  removePlacesFromTrip: RemovePlacesFromTripRenderer,
+  reschedulePlaces: ReschedulePlacesRenderer,
+  getTripDetails: GetTripDetailsRenderer,
+  updateDayInfo: UpdateDayInfoRenderer,
 };
 
 export type ToolName = keyof typeof toolRenderers;

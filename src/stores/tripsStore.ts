@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import type { Trip, TripItem, TripStatus, Place, TripItemCategory } from '@/types';
+import type { Trip, TripItem, TripStatus, Place, TripItemCategory, TripDayInfo } from '@/types';
 
 interface TripsState {
   trips: Trip[];
@@ -31,6 +31,8 @@ interface TripsActions {
   // Day management
   addDay: (tripId: string) => void;
   removeDay: (tripId: string, day: number) => void;
+  updateDayInfo: (tripId: string, day: number, info: TripDayInfo) => void;
+  getDayInfo: (tripId: string, day: number) => TripDayInfo | undefined;
 
   // Utilities
   setLoading: (loading: boolean) => void;
@@ -288,10 +290,25 @@ export const useTripsStore = create<TripsState & TripsActions>()(
                     day: item.day > day ? item.day - 1 : item.day,
                   }));
 
+                // Also adjust dayInfo keys
+                const newDayInfo: Record<number, TripDayInfo> = {};
+                if (trip.dayInfo) {
+                  Object.entries(trip.dayInfo).forEach(([dayStr, info]) => {
+                    const dayNum = parseInt(dayStr, 10);
+                    if (dayNum < day) {
+                      newDayInfo[dayNum] = info;
+                    } else if (dayNum > day) {
+                      newDayInfo[dayNum - 1] = info;
+                    }
+                    // Skip the removed day
+                  });
+                }
+
                 return {
                   ...trip,
                   items: updatedItems,
                   daysCount: Math.max(1, trip.daysCount - 1),
+                  dayInfo: Object.keys(newDayInfo).length > 0 ? newDayInfo : undefined,
                   updatedAt: new Date().toISOString(),
                 };
               }),
@@ -299,6 +316,39 @@ export const useTripsStore = create<TripsState & TripsActions>()(
             false,
             'removeDay'
           );
+        },
+
+        updateDayInfo: (tripId, day, info) => {
+          set(
+            (state) => ({
+              trips: state.trips.map((trip) => {
+                if (trip.id !== tripId) return trip;
+
+                const currentDayInfo = trip.dayInfo || {};
+                const updatedDayInfo = {
+                  ...currentDayInfo,
+                  [day]: {
+                    ...currentDayInfo[day],
+                    ...info,
+                  },
+                };
+
+                return {
+                  ...trip,
+                  dayInfo: updatedDayInfo,
+                  updatedAt: new Date().toISOString(),
+                };
+              }),
+            }),
+            false,
+            'updateDayInfo'
+          );
+        },
+
+        getDayInfo: (tripId, day) => {
+          const state = get();
+          const trip = state.trips.find((t) => t.id === tripId);
+          return trip?.dayInfo?.[day];
         },
 
         setLoading: (loading) => {

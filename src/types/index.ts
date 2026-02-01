@@ -142,6 +142,11 @@ export interface TripItem {
   category?: TripItemCategory;
 }
 
+export interface TripDayInfo {
+  title?: string;
+  description?: string;
+}
+
 export interface Trip {
   id: string;
   name: string;
@@ -155,6 +160,7 @@ export interface Trip {
   items: TripItem[];
   status: TripStatus;
   daysCount: number;
+  dayInfo?: Record<number, TripDayInfo>; // Day number -> info
 }
 
 // Chat/Copilot types
