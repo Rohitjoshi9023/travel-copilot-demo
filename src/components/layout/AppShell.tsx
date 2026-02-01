@@ -64,10 +64,13 @@ export function AppShell({ googleMapsApiKey }: AppShellProps) {
         <header className="absolute top-0 left-0 right-0 z-30 pointer-events-none">
           <div className="p-4 flex items-center gap-4">
             {/* Logo */}
-            <div className="pointer-events-auto flex items-center gap-2 px-3 py-2 bg-white rounded-lg shadow-md">
-              <Map className="w-5 h-5 text-indigo-600" />
-              <span className="font-semibold text-gray-900 hidden sm:inline">
-                Maps Copilot
+            <div
+              className="pointer-events-auto flex items-center gap-2 px-3 py-2 rounded-lg shadow-lg border border-gray-200"
+              style={{ backgroundColor: '#ffffff' }}
+            >
+              <Map style={{ width: 20, height: 20, stroke: '#4f46e5' }} />
+              <span className="font-semibold hidden sm:inline" style={{ color: '#111827' }}>
+                Travel Copilot
               </span>
             </div>
 
@@ -77,13 +80,14 @@ export function AppShell({ googleMapsApiKey }: AppShellProps) {
               className="pointer-events-auto flex-1 max-w-xl"
             >
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2" style={{ width: 20, height: 20, stroke: '#9ca3af' }} />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search places or ask Copilot..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-white rounded-lg shadow-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-lg shadow-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  style={{ backgroundColor: '#ffffff', color: '#1f2937', caretColor: '#1f2937' }}
                 />
                 {isSearching && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -98,30 +102,33 @@ export function AppShell({ googleMapsApiKey }: AppShellProps) {
               {/* Chat toggle button */}
               <button
                 onClick={toggleChat}
-                className={`
-                  p-2.5 rounded-lg shadow-md transition-colors
-                  ${isChatOpen ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}
-                `}
+                className="p-2.5 rounded-lg shadow-lg transition-colors border"
+                style={{
+                  backgroundColor: isChatOpen ? '#4f46e5' : '#ffffff',
+                  borderColor: isChatOpen ? '#4338ca' : '#e5e7eb',
+                }}
                 title={isChatOpen ? 'Close Copilot' : 'Open Copilot'}
               >
-                <MessageSquare className="w-5 h-5" />
+                <MessageSquare style={{ width: 20, height: 20, stroke: isChatOpen ? '#ffffff' : '#4b5563' }} />
               </button>
 
               {/* Settings */}
               <button
                 onClick={() => setIsMenuOpen(true)}
-                className="p-2.5 bg-white rounded-lg shadow-md text-gray-600 hover:bg-gray-50 transition-colors hidden sm:block"
+                className="p-2.5 rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 transition-colors hidden sm:block"
+                style={{ backgroundColor: '#ffffff' }}
                 title="Settings"
               >
-                <Settings className="w-5 h-5" />
+                <Settings style={{ width: 20, height: 20, stroke: '#4b5563' }} />
               </button>
 
               {/* User */}
               <button
-                className="w-9 h-9 bg-indigo-100 rounded-lg shadow-md flex items-center justify-center hidden sm:flex"
+                className="w-9 h-9 rounded-lg shadow-lg border border-indigo-200 flex items-center justify-center hidden sm:flex"
+                style={{ backgroundColor: '#e0e7ff' }}
                 title="Account"
               >
-                <User className="w-5 h-5 text-indigo-600" />
+                <User style={{ width: 20, height: 20, stroke: '#4f46e5' }} />
               </button>
             </div>
           </div>
@@ -167,9 +174,9 @@ export function AppShell({ googleMapsApiKey }: AppShellProps) {
         {isMobile && !isChatOpen && (
           <button
             onClick={toggleChat}
-            className="fixed bottom-6 right-6 z-30 w-14 h-14 bg-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-indigo-700 transition-colors"
+            className="fixed bottom-6 right-6 z-30 w-14 h-14 bg-indigo-600 rounded-full shadow-lg flex items-center justify-center hover:bg-indigo-700 transition-colors border border-indigo-700"
           >
-            <MessageSquare className="w-6 h-6" />
+            <MessageSquare style={{ width: 24, height: 24, stroke: '#ffffff' }} />
           </button>
         )}
 
