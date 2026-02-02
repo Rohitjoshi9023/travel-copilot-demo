@@ -657,6 +657,121 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   }
 }
 
+/* Shimmer animation for chat loading */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* SDK Loading indicator override - shimmer effect */
+[data-copilot-root] [class*="loading"],
+[data-copilot-root] [class*="Loading"],
+[data-copilot-root] [class*="typing"],
+[data-copilot-root] [class*="Typing"],
+[data-copilot-root] [class*="pending"],
+[data-copilot-root] [class*="generating"],
+.csdk-loading,
+.csdk-typing-indicator {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 1rem 1.25rem !important;
+  background: linear-gradient(
+    90deg,
+    #f3f4f6 0%,
+    #e5e7eb 20%,
+    #f9fafb 40%,
+    #e5e7eb 60%,
+    #f3f4f6 80%,
+    #e5e7eb 100%
+  ) !important;
+  background-size: 200% 100% !important;
+  animation: shimmer 1.5s ease-in-out infinite !important;
+  border-radius: 1rem !important;
+  margin: 0.5rem 1rem !important;
+  max-width: 80% !important;
+  min-height: 3rem !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+/* Hide the default "Loading..." text and replace with dots */
+[data-copilot-root] [class*="loading"] span,
+[data-copilot-root] [class*="Loading"] span,
+.csdk-loading span {
+  font-size: 0 !important;
+  color: transparent !important;
+}
+
+[data-copilot-root] [class*="loading"]::after,
+[data-copilot-root] [class*="Loading"]::after,
+.csdk-loading::after {
+  content: '';
+  display: flex;
+  gap: 0.375rem;
+}
+
+/* Animated dots for loading */
+[data-copilot-root] [class*="loading"]::before,
+[data-copilot-root] [class*="Loading"]::before,
+.csdk-loading::before {
+  content: '●  ●  ●';
+  font-size: 0.625rem;
+  color: #9ca3af;
+  letter-spacing: 0.25rem;
+  animation: loading-dots 1.4s ease-in-out infinite;
+}
+
+@keyframes loading-dots {
+  0%, 80%, 100% {
+    opacity: 0.4;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+/* Alternative: Bouncing dots animation */
+.loading-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.loading-dots span {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #9ca3af;
+  border-radius: 50%;
+  animation: bounce-dot 1.4s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce-dot {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 /* Utility classes */
 .line-clamp-1 {
   display: -webkit-box;

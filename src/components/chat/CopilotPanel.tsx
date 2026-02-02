@@ -2,22 +2,43 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { X, Loader2, Sparkles, MessageSquare, Map } from 'lucide-react';
+import { X, Sparkles, MessageSquare, Map } from 'lucide-react';
 import { useChatIntentStore } from '@/stores/chatIntentStore';
+
+// Shimmer loading component for panel content
+function ShimmerLoader() {
+  return (
+    <div className="flex-1 flex flex-col p-4 gap-3">
+      {/* Simulated message bubbles with shimmer */}
+      <div className="flex gap-3 items-start">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite]" />
+        <div className="flex-1 space-y-2">
+          <div className="h-4 w-3/4 rounded-lg bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite]" />
+          <div className="h-4 w-1/2 rounded-lg bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite]" />
+        </div>
+      </div>
+      <div className="flex gap-3 items-start justify-end">
+        <div className="w-2/3 space-y-2">
+          <div className="h-4 w-full rounded-lg bg-gradient-to-r from-indigo-200 via-indigo-100 to-indigo-200 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite]" />
+        </div>
+      </div>
+      <div className="flex gap-3 items-start">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite]" />
+        <div className="flex-1 space-y-2">
+          <div className="h-4 w-full rounded-lg bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite]" />
+          <div className="h-4 w-2/3 rounded-lg bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite]" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Dynamically import the content components with SSR disabled
 const CopilotPanelContent = dynamic(
   () => import('./CopilotPanelContent').then((mod) => mod.CopilotPanelContent),
   {
     ssr: false,
-    loading: () => (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="flex items-center gap-2 text-gray-500">
-          <Loader2 className="w-5 h-5 animate-spin" />
-          <span>Loading...</span>
-        </div>
-      </div>
-    ),
+    loading: () => <ShimmerLoader />,
   }
 );
 
@@ -25,14 +46,7 @@ const TripsPanelContent = dynamic(
   () => import('@/components/trips/TripsPanelContent').then((mod) => mod.TripsPanelContent),
   {
     ssr: false,
-    loading: () => (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="flex items-center gap-2 text-gray-500">
-          <Loader2 className="w-5 h-5 animate-spin" />
-          <span>Loading...</span>
-        </div>
-      </div>
-    ),
+    loading: () => <ShimmerLoader />,
   }
 );
 

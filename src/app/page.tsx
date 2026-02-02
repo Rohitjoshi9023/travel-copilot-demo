@@ -2,17 +2,39 @@
 
 import dynamic from 'next/dynamic';
 
+// Shimmer app loading screen
+function AppLoadingScreen() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-indigo-50 via-white to-gray-50">
+      {/* Logo with shimmer */}
+      <div className="relative mb-6">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-500 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite] flex items-center justify-center shadow-lg">
+          <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+          </svg>
+        </div>
+        {/* Pulse ring */}
+        <div className="absolute inset-0 rounded-2xl bg-indigo-400 animate-ping opacity-20" />
+      </div>
+
+      {/* App name */}
+      <h1 className="text-xl font-semibold text-gray-900 mb-2">Travel Copilot</h1>
+
+      {/* Loading bar */}
+      <div className="w-48 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+        <div className="h-full w-full bg-gradient-to-r from-indigo-500 via-indigo-400 to-indigo-500 bg-[length:200%_100%] animate-[shimmer_1s_ease-in-out_infinite] rounded-full" />
+      </div>
+
+      {/* Subtle text */}
+      <p className="text-sm text-gray-400 mt-3">Preparing your journey...</p>
+    </div>
+  );
+}
+
 // Dynamically import AppShell with SSR disabled to avoid hydration issues with CopilotProvider
 const AppShell = dynamic(() => import('@/components/layout/AppShell').then((mod) => mod.AppShell), {
   ssr: false,
-  loading: () => (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="flex items-center gap-3">
-        <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-        <span className="text-gray-600">Loading Maps Copilot...</span>
-      </div>
-    </div>
-  ),
+  loading: () => <AppLoadingScreen />,
 });
 
 export default function Home() {

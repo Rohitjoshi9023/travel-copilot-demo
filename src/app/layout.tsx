@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Maps Copilot - AI-Powered Travel Guide',
+  title: 'Travel Copilot - AI-Powered Travel Guide',
   description:
     'Explore places, find hotels and restaurants, plan trips, and navigate with your AI travel copilot.',
   keywords: ['maps', 'travel', 'AI', 'copilot', 'tour guide', 'hotels', 'restaurants'],
-  authors: [{ name: 'Maps Copilot Team' }],
+  authors: [{ name: 'Travel Copilot Team' }],
 };
 
 export const viewport: Viewport = {
