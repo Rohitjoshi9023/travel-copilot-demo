@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import { useCopilot } from '@yourgpt/copilot-sdk/react';
-import { CopilotChat, useCopilotChatContext } from '@yourgpt/copilot-sdk/ui';
-import { MapPin, Utensils, Hotel, CalendarPlus, Landmark } from 'lucide-react';
-import { CopilotToolsProvider } from './CopilotToolsProvider';
-import { toolRenderers } from './toolRenderers';
-import { useChatIntentStore } from '@/stores/chatIntentStore';
-import { useTripsStore } from '@/stores/tripsStore';
+import { useEffect, useRef } from "react";
+import { useCopilot } from "@yourgpt/copilot-sdk/react";
+import { CopilotChat, useCopilotChatContext } from "@yourgpt/copilot-sdk/ui";
+import { MapPin, Utensils, Hotel, CalendarPlus, Landmark } from "lucide-react";
+import { CopilotToolsProvider } from "./CopilotToolsProvider";
+import { toolRenderers } from "./toolRenderers";
+import { useChatIntentStore } from "@/stores/chatIntentStore";
+import { useTripsStore } from "@/stores/tripsStore";
 
 // Import Copilot SDK base styles
-import '@yourgpt/copilot-sdk/ui/styles.css';
+// import "@yourgpt/copilot-sdk/ui/styles.css";
 
 // Component that watches for pending intents and sends messages to AI
 function ChatIntentHandler() {
@@ -26,7 +26,7 @@ function ChatIntentHandler() {
       processedIntentRef.current = pendingIntent.timestamp;
 
       const place = pendingIntent.place;
-      const tripName = activeTrip?.name || 'my trip';
+      const tripName = activeTrip?.name || "my trip";
       const tripDays = activeTrip?.daysCount || 1;
 
       // Construct a helpful message for the AI
@@ -56,31 +56,18 @@ function ChatIntentHandler() {
 }
 
 // Quick action chip component
-function QuickActionChip({
-  icon: Icon,
-  label,
-  message,
-  color = 'indigo'
-}: {
-  icon: React.ElementType;
-  label: string;
-  message: string;
-  color?: 'indigo' | 'orange' | 'emerald' | 'purple';
-}) {
+function QuickActionChip({ icon: Icon, label, message, color = "indigo" }: { icon: React.ElementType; label: string; message: string; color?: "indigo" | "orange" | "emerald" | "purple" }) {
   const { send } = useCopilotChatContext();
 
   const colorClasses = {
-    indigo: 'bg-indigo-100 text-indigo-600',
-    orange: 'bg-orange-100 text-orange-600',
-    emerald: 'bg-emerald-100 text-emerald-600',
-    purple: 'bg-purple-100 text-purple-600',
+    indigo: "bg-indigo-100 text-indigo-600",
+    orange: "bg-orange-100 text-orange-600",
+    emerald: "bg-emerald-100 text-emerald-600",
+    purple: "bg-purple-100 text-purple-600",
   };
 
   return (
-    <button
-      onClick={() => send(message)}
-      className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all text-left group"
-    >
+    <button onClick={() => send(message)} className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all text-left group">
       <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${colorClasses[color]}`}>
         <Icon className="w-4 h-4" />
       </div>
@@ -90,24 +77,11 @@ function QuickActionChip({
 }
 
 // Popular destination card
-function DestinationCard({
-  name,
-  country,
-  emoji,
-  prompt
-}: {
-  name: string;
-  country: string;
-  emoji: string;
-  prompt?: string;
-}) {
+function DestinationCard({ name, country, emoji, prompt }: { name: string; country: string; emoji: string; prompt?: string }) {
   const { send } = useCopilotChatContext();
 
   return (
-    <button
-      onClick={() => send(prompt || `Show me ${name}`)}
-      className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-indigo-200 hover:shadow-sm transition-all text-left"
-    >
+    <button onClick={() => send(prompt || `Show me ${name}`)} className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-indigo-200 hover:shadow-sm transition-all text-left">
       <span className="text-2xl">{emoji}</span>
       <div>
         <div className="font-medium text-gray-900 text-sm">{name}</div>
@@ -139,30 +113,10 @@ function TravelHome() {
       <div className="px-4 mb-6">
         <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Quick Actions</h3>
         <div className="grid grid-cols-2 gap-2">
-          <QuickActionChip
-            icon={Utensils}
-            label="Find restaurants"
-            message="Find restaurants near me"
-            color="orange"
-          />
-          <QuickActionChip
-            icon={Hotel}
-            label="Search hotels"
-            message="Search for hotels nearby"
-            color="indigo"
-          />
-          <QuickActionChip
-            icon={Landmark}
-            label="Attractions"
-            message="Show me popular attractions"
-            color="purple"
-          />
-          <QuickActionChip
-            icon={CalendarPlus}
-            label="Plan a trip"
-            message="Help me plan a new trip"
-            color="emerald"
-          />
+          <QuickActionChip icon={Utensils} label="Find restaurants" message="Find restaurants near me" color="orange" />
+          <QuickActionChip icon={Hotel} label="Search hotels" message="Search for hotels nearby" color="indigo" />
+          <QuickActionChip icon={Landmark} label="Attractions" message="Show me popular attractions" color="purple" />
+          <QuickActionChip icon={CalendarPlus} label="Plan a trip" message="Help me plan a new trip" color="emerald" />
         </div>
       </div>
 
@@ -185,15 +139,18 @@ export function CopilotPanelContent() {
   const { registeredTools, status, toolExecutions } = useCopilot();
 
   useEffect(() => {
-    console.log('[Copilot] Registered tools:', registeredTools?.map(t => t.name));
+    console.log(
+      "[Copilot] Registered tools:",
+      registeredTools?.map((t) => t.name),
+    );
   }, [registeredTools]);
 
   useEffect(() => {
-    console.log('[Copilot] Status changed:', status);
+    console.log("[Copilot] Status changed:", status);
   }, [status]);
 
   useEffect(() => {
-    console.log('[Copilot] Tool executions:', toolExecutions);
+    console.log("[Copilot] Tool executions:", toolExecutions);
   }, [toolExecutions]);
 
   return (
@@ -208,10 +165,10 @@ export function CopilotPanelContent() {
       <CopilotChat.Root
         className="h-full flex-1 min-h-0"
         assistantAvatar={{
-          fallback: '🗺️',
+          src: "/logo-travel.png",
         }}
         userAvatar={{
-          fallback: '👤',
+          fallback: "👤",
         }}
         showUserAvatar={false}
         attachmentsEnabled={false}
@@ -224,7 +181,7 @@ export function CopilotPanelContent() {
         </CopilotChat.HomeView>
 
         {/* Chat view - shown when there are messages */}
-        <CopilotChat.ChatView className="h-full flex-1 min-h-0 overflow-y-auto" />
+        <CopilotChat.ChatView className="" />
       </CopilotChat.Root>
     </div>
   );
