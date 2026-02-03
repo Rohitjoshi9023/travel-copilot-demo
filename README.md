@@ -52,8 +52,8 @@ An open-source demo showcasing how to build AI-powered applications with the [Yo
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/travel-copilot.git
-cd travel-copilot
+git clone https://github.com/Rohitjoshi9023/travel-copilot-demo.git
+cd travel-copilot-demo
 ```
 
 ### 2. Install dependencies
