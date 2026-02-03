@@ -1,6 +1,6 @@
-# ✈️ Travel Copilot Demo
+# ✈️ Trip Planner Copilot Demo
 
-**AI-powered travel planning copilot with natural language integrated with Google Maps**
+**AI-powered trip planning copilot with natural language integrated with Google Maps**
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
@@ -52,8 +52,8 @@ An open-source demo showcasing how to build AI-powered applications with the [Yo
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/Rohitjoshi9023/travel-copilot-demo.git
-cd travel-copilot-demo
+git clone https://github.com/Rohitjoshi9023/trip-planner-copilot-demo.git
+cd trip-planner-copilot-demo
 ```
 
 ### 2. Install dependencies
@@ -162,7 +162,7 @@ Contributions are welcome! This is an open-source demo project, and we'd love yo
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-Found a bug or have a suggestion? [Open an issue](https://github.com/Rohitjoshi9023/travel-copilot-demo/issues)!
+Found a bug or have a suggestion? [Open an issue](https://github.com/Rohitjoshi9023/trip-planner-copilot-demo/issues)!
 
 ---
 
