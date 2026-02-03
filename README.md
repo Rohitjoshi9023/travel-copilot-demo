@@ -13,7 +13,7 @@ An open-source demo showcasing how to build AI-powered applications with the [Yo
 ## 🎬 Demo
 
 <!-- Add your YouTube video link here -->
-[![Demo Video](https://img.shields.io/badge/Watch-Demo_Video-red?style=for-the-badge&logo=youtube)](YOUR_YOUTUBE_LINK_HERE)
+[![Demo Video](https://img.shields.io/badge/Watch-Demo_Video-red?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=3piC8oJkX4c)
 
 ### Screenshots
 
