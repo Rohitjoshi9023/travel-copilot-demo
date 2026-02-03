@@ -162,7 +162,7 @@ Contributions are welcome! This is an open-source demo project, and we'd love yo
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-Found a bug or have a suggestion? [Open an issue](https://github.com/yourusername/travel-copilot/issues)!
+Found a bug or have a suggestion? [Open an issue](https://github.com/Rohitjoshi9023/travel-copilot-demo/issues)!
 
 ---
 
