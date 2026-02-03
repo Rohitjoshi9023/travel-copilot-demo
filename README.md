@@ -1,4 +1,4 @@
-# ✈️ Travel Copilot
+# ✈️ Travel Copilot Demo
 
 **AI-powered travel planning copilot with natural language integrated with Google Maps**
 
